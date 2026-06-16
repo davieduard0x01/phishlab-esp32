@@ -1,31 +1,19 @@
 # PhishLab ESP32
 
-A captive-portal **phishing-awareness experiment** for the ESP32. It stands up an open
-Wi-Fi access point, hijacks DNS to force the captive-portal page to open, and shows a
-fake Google login. The twist: instead of actually stealing anything, the moment a
-participant submits their credentials the portal **reveals it was a phishing test** and
-teaches them how to protect themselves.
-
-Built for a university security-awareness study to measure how susceptible people are to
-a fake public Wi-Fi login.
-
-> ⚠️ **Authorized / educational use only.** Run this only on hardware you own, in a
-> controlled environment, with people who have consented to take part. Capturing other
-> people's credentials without authorization is illegal in most countries. By using this
-> code you accept full responsibility for how you use it. See [LICENSE](LICENSE).
-
----
+A captive-portal credential-capture tool for the ESP32. It brings up an open Wi-Fi
+access point, hijacks DNS so the device's captive-portal page opens automatically, and
+serves a fake Google login. Submitted credentials are kept in memory and viewable on a
+PIN-protected panel.
 
 ## How it works
 
 1. The ESP32 brings up an **open access point** (`Wifi Gratis`).
-2. A DNS server answers **every** domain with the ESP32's IP, so the phone's OS opens its
-   "captive portal" page automatically.
-3. The participant sees a **fake Google login** page and types their credentials.
-4. Instead of a silent capture, the portal immediately serves an **educational page**
-   explaining that it was a phishing test, with tips on how to stay safe.
-5. Submitted entries are kept in **RAM only** and can be viewed by the researcher on the
-   PIN-protected `/creds` route — solely to measure the experiment's hit rate.
+2. A DNS server answers **every** domain with the ESP32's IP, so the device's OS opens its
+   captive-portal page automatically.
+3. The user is shown a **fake Google login** page.
+4. On submit, the credentials are stored and a response page is returned.
+5. Captured entries are kept in **RAM only** and can be viewed on the PIN-protected
+   `/creds` route.
 
 ## Hardware
 
@@ -67,42 +55,39 @@ arduino-cli monitor -p /dev/cu.usbserial-0001 -c baudrate=115200
 ## Usage
 
 1. Flash the board and power it on.
-2. On a test phone, connect to the **`Wifi Gratis`** network.
+2. Connect a device to the **`Wifi Gratis`** network.
 3. The captive portal opens automatically with the fake Google login.
-4. Submit any credentials → the educational "this was a phishing test" page appears.
-5. As the researcher, browse to `http://8.8.8.8/creds`, enter the PIN, and review the
-   collected entries to measure the experiment's results.
+4. Browse to `http://8.8.8.8/creds`, enter the PIN, and review the captured entries.
 
 ## Configuration
 
 Edit the constants at the top of [`phishlab-esp32.ino`](phishlab-esp32.ino):
 
-| Constant       | Default             | Description                                              |
-| -------------- | ------------------- | -------------------------------------------------------- |
+| Constant       | Default       | Description                                              |
+| -------------- | ------------- | -------------------------------------------------------- |
 | `nomeDaRede`   | `Wifi Gratis` | SSID of the fake open network.                           |
-| `senhaDaRede`  | `""` (empty)        | Network password. Empty = open network.                  |
-| `ipDoPortal`   | `8.8.8.8`           | IP the access point and DNS hijack respond with.         |
-| `pinDoPainel`  | `admin`             | PIN for the `/creds` panel. **Change this before use.**  |
+| `senhaDaRede`  | `""` (empty)  | Network password. Empty = open network.                  |
+| `ipDoPortal`   | `8.8.8.8`     | IP the access point and DNS hijack respond with.         |
+| `pinDoPainel`  | `admin`       | PIN for the `/creds` panel. **Change this before use.**  |
 
 > 🔑 The default PIN (`admin`) is a **public placeholder**. Always set your own PIN before
-> running a real session, then recompile and re-flash.
+> use, then recompile and re-flash.
 
 ## Routes
 
 | Route            | Method | Description                                            |
 | ---------------- | ------ | ------------------------------------------------------ |
 | `/`              | GET    | Fake Google login page.                                |
-| `/`              | POST   | Stores the submitted entry, returns the awareness page.|
-| `/creds`         | GET    | PIN prompt for the researcher panel.                   |
+| `/`              | POST   | Stores the submitted entry, returns the response page. |
+| `/creds`         | GET    | PIN prompt for the panel.                              |
 | `/creds-verify`  | POST   | Validates the PIN and shows the captured entries.      |
 | `/clear`         | POST   | Clears the in-memory list of entries.                  |
 
 ## Notes & limitations
 
-- Entries live in **RAM only** and are lost on reboot — adequate for a controlled session.
+- Entries live in **RAM only** and are lost on reboot.
 - The DNS hijack catches most platforms; some devices cache DNS and may need Wi-Fi toggled.
-- This is a teaching tool, not a polished pentest framework. Keep it that way.
 
 ## License
 
-[MIT](LICENSE) — for educational and authorized security-research use only.
+[MIT](LICENSE)
