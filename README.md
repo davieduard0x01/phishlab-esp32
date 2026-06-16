@@ -1,9 +1,9 @@
 # PhishLab ESP32
 
-A captive-portal credential-capture tool for the ESP32. It brings up an open Wi-Fi
-access point, hijacks DNS so the device's captive-portal page opens automatically, and
-serves a fake Google login. Submitted credentials are kept in memory and viewable on a
-PIN-protected panel.
+A captive-portal credential-capture tool for the ESP32, intended for security-awareness
+demonstrations. It brings up an open Wi-Fi access point, hijacks DNS so the device's
+captive-portal page opens automatically, and serves a fake Google login. Submitted
+credentials are kept in memory and viewable on a PIN-protected panel.
 
 ## How it works
 
